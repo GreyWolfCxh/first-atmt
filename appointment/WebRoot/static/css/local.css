@@ -1,0 +1,72 @@
+body,td,th{
+	font-family:SimSun;
+	font-size: 12px;
+	color: black; 
+}
+.combo{
+	width:172px!important;
+}
+#toolbar{
+	padding:5px;
+	height:auto;
+}
+.sitem{
+	padding:5px;
+}
+.fm{
+	margin:0;
+	padding:10px;
+}
+.fitem{
+	margin-bottom:5px;
+}
+.fitem label{
+	display:inline-block;
+	width:120px;
+	text-align:right;
+	padding-right:5px;
+}
+body{
+	margin:0px !important;
+}
+.easyui-panel{  
+	overflow: hidden;  
+}
+.tabs-panels>.panel>.panel-body {  
+    overflow: hidden;  
+}
+html{
+	overflow: hidden;  
+}
+.red{
+	color:red;
+	padding-left:5px;
+	padding-right:5px;	
+	font-size:10pt;
+	font-weight:900;
+}
+.pagination-page-list{
+	display:none;
+}
+.pagination-load{
+	display:none !important;
+}
+input{
+	border:1px solid #d4d4d4;
+	width:170px;
+} 
+textarea{
+	border:1px solid #d4d4d4;
+	font:400 13.3333px Arial;
+}
+.tabs-closable{
+	color:black;
+}
+.tabs{
+	height:20px;
+}
+.tabs .tabs-inner{
+	height:19px !important;
+	line-height: 19px !important;
+}
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.sys.dao.IMenuMapper">
+	<resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.sys.entity.Menu">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="PARENT" jdbcType="INTEGER" property="parentId" />
+    <result column="ANCESTOR" jdbcType="VARCHAR" property="parentIds" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="URL" jdbcType="VARCHAR" property="href" />
+    <result column="POSITION" jdbcType="INTEGER" property="sort" />
+    <result column="TYPE" jdbcType="INTEGER" property="isShow" />  
+    <result column="ALIAS" jdbcType="VARCHAR" property="permission" />
+    <result column="STATUS" jdbcType="INTEGER" property="status" />
+  </resultMap>
+   
+  <sql id="Base_Column_List">
+    M.ID, M.PARENT, M.ANCESTOR, M.NAME, M.URL, M.POSITION, M.TYPE, M.ALIAS, M.STATUS
+  </sql>
+  
+	<select id="findAllMenuList" resultMap="BaseResultMap">
+		SELECT 	DISTINCT
+			<include refid="Base_Column_List"></include>
+		FROM T_RIGHTS M 
+		WHERE STATUS != #{STATUS_FLAG_DELETE}
+		AND (M.ANCESTOR LIKE '%'||'129901316'||'%')
+		ORDER BY M.POSITION
+	</select>
+	<select id="findMenuByUserId" resultMap="BaseResultMap">  
+		SELECT 	DISTINCT
+			<include refid="Base_Column_List"></include>
+		FROM T_USER U
+		LEFT JOIN T_ROLE_USER UR
+		ON U.ID = UR."USER"
+		LEFT JOIN T_ROLE_RIGHTS RM
+		ON UR.ROLE = RM.ROLE
+		LEFT JOIN T_RIGHTS M
+		ON RM.RIGHTS = M.ID 
+		WHERE M.STATUS != #{STATUS_FLAG_DELETE} 
+		AND U.ID = #{user.id}
+		AND (M.ANCESTOR LIKE '%'||'129901316'||'%')
+		ORDER BY M.POSITION
+	</select>
+	
+	<select id="getMenuListByParentId" resultMap="BaseResultMap">
+		SELECT 	DISTINCT
+			<include refid="Base_Column_List"></include>
+		FROM T_RIGHTS M 
+		LEFT JOIN T_ROLE_RIGHTS RM
+		ON RM.RIGHTS = M.ID
+		LEFT JOIN T_ROLE_USER UR
+		ON UR.ROLE = RM.ROLE
+		WHERE M.STATUS != #{STATUS_FLAG_DELETE}
+		AND UR."USER" =  #{currentUser.id} 
+		AND M.PARENT = #{parentId}
+		AND (M.ANCESTOR LIKE '%'||'129901316'||'%')
+		ORDER BY M.POSITION
+	</select>
+</mapper>

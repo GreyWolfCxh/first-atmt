@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.workbench.dao.DishonestyOperationMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.workbench.entity.DishonestyOperation" >
+    <result column="ID" property="id" jdbcType="INTEGER" />
+    <result column="RECORD_ID" property="recordId" jdbcType="INTEGER" />
+    <result column="USER_ACCOUNT" property="userAccount" jdbcType="VARCHAR" />
+    <result column="NUMBER" property="number" jdbcType="INTEGER" />
+    <result column="START_TIME" property="startTime" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+    <result column="DAY_NUMBER" property="dayNumber" jdbcType="INTEGER" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.workbench.entity.DishonestyOperation" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_DISH_OPERATION_ID_SEQ .nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_DISHONESTY_OPERATION (ID, RECORD_ID, USER_ACCOUNT, 
+      NUMBER, START_TIME, UPDATE_TIME, 
+      DAY_NUMBER, REMARKS1, REMARKS2, 
+      REMARKS3, REMARKS4)
+    values (#{id,jdbcType=INTEGER}, #{recordId,jdbcType=INTEGER}, #{userAccount,jdbcType=VARCHAR}, 
+      #{number,jdbcType=INTEGER}, #{startTime,jdbcType=DATE}, #{updateTime,jdbcType=DATE}, 
+      #{dayNumber,jdbcType=INTEGER}, #{remarks1,jdbcType=VARCHAR}, #{remarks2,jdbcType=VARCHAR}, 
+      #{remarks3,jdbcType=VARCHAR}, #{remarks4,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.workbench.entity.DishonestyOperation" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_DISH_OPERATION_ID_SEQ .nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_DISHONESTY_OPERATION
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="recordId != null" >
+        RECORD_ID,
+      </if>
+      <if test="userAccount != null" >
+        USER_ACCOUNT,
+      </if>
+      <if test="number != null" >
+        NUMBER,
+      </if>
+      <if test="startTime != null" >
+        START_TIME,
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME,
+      </if>
+      <if test="dayNumber != null" >
+        DAY_NUMBER,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="recordId != null" >
+        #{recordId,jdbcType=INTEGER},
+      </if>
+      <if test="userAccount != null" >
+        #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="dayNumber != null" >
+        #{dayNumber,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

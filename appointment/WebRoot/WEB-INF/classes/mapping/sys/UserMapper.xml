@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.comit.appointment.modules.sys.dao.IUserMapper">
+	<resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.sys.entity.User">
+	    <id column="ID" jdbcType="INTEGER" property="id" />
+	    <result column="ALIAS" jdbcType="VARCHAR" property="num" />
+	    <result column="PASSWORD" jdbcType="VARCHAR" property="pwd" />
+	    <result column="POSITION" jdbcType="INTEGER" property="sort" />
+	    <result column="ALIAS" jdbcType="VARCHAR" property="alias" />
+	    <result column="NAME" jdbcType="VARCHAR" property="name" />
+	    <result column="ORGANIZATION" jdbcType="INTEGER" property="areaId" />
+	    <result column="deptId" jdbcType="INTEGER" property="deptId" />
+	    <result column="POST" jdbcType="VARCHAR" property="post" /> 
+	    <result column="CERTIFICATE_NO" jdbcType="VARCHAR" property="certificateNo" />
+	    <result column="CERTIFICATE_CLASS" jdbcType="VARCHAR" property="certificateClass" />
+	    <result column="CERTIFICATE_DATE" jdbcType="DATE" property="certificateDate" />
+	    <result column="VALID_DATE" jdbcType="DATE" property="validDate" />
+	    <result column="STATUS" jdbcType="INTEGER" property="status" />
+  </resultMap>
+  <resultMap id="RichResultMap" type="cn.com.comit.appointment.modules.sys.entity.User" extends="BaseResultMap">  
+	    <result column="A.NAME" jdbcType="VARCHAR" property="areaName" />
+	    <result column="D.NAME" jdbcType="VARCHAR" property="deptName" />
+  </resultMap> 
+  <sql id="Base_Column_List">  
+    U.ID, U.ALIAS,'123456' AS "PASSWORD", U.POSITION, U.ALIAS, U.NAME, U.ORGANIZATION, D.ID AS deptId,  
+    U.POST, U.CERTIFICATE_NO, U.CERTIFICATE_CLASS, U.CERTIFICATE_DATE, U.VALID_DATE, U.STATUS 
+  </sql> 
+	<select id="getUserByLoginName" resultMap="RichResultMap">
+		SELECT 
+			<include refid="Base_Column_List"></include>,
+			A.NAME AS "A.NAME",
+			D.NAME AS "D.NAME"
+		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID
+		WHERE U.ALIAS = #{num}
+		AND U.STATUS = #{STATUS_FLAG_NORMAL}
+	</select>
+	
+	<select id="getUserById" resultMap="RichResultMap">
+		SELECT 
+			<include refid="Base_Column_List"></include>, 
+			A.NAME AS "A.NAME",
+			D.NAME AS "D.NAME"
+		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID
+		WHERE U.ID = #{id}
+		AND U.STATUS = #{STATUS_FLAG_NORMAL}
+	</select>
+	
+	
+	<select id="getUserList" resultMap="RichResultMap">
+		SELECT *
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN
+	    FROM 
+		(
+		SELECT
+			<include refid="Base_Column_List"></include>,
+			A.NAME AS "A.NAME",
+			D.NAME AS "D.NAME"
+		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID
+		WHERE U.STATUS != #{STATUS_FLAG_DELETE}
+		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%') 
+		<if test="areaId != null">
+			AND (A.ID = #{areaId} OR A.ANCESTOR LIKE '%'||#{areaId}||'%')
+		</if>
+		<if test="deptId != null">
+			AND D.ID = #{deptId}
+		</if>
+		<if test="post != null and post != ''">
+			AND U.POST = #{post}  
+		</if>
+		<if test="name != null and name != ''">
+			AND U.NAME LIKE '%'||#{name}||'%'     
+		</if> 
+		ORDER BY POSITION 
+	    ) INNER ) WHERE RN BETWEEN #{start} AND #{end}
+	</select>
+	
+	
+	<select id="numValidate" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(*)
+		FROM T_USER
+		WHERE ALIAS = #{num}
+	</select>
+	
+  	
+  	
+  	
+  	<select id="getUserByTaskItem" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+  		SELECT
+  			U.ID "id",
+  			U.NAME "name"  
+  		FROM T_USER U
+  		LEFT JOIN T_RN_ITEM_INSPECTOR II
+  		ON U.ID = II.INSPECTOR_ID
+  		WHERE II.ITEM_ID = #{id}
+  	</select>
+  	
+  	<insert id="insertUserRole" parameterType="cn.com.comit.appointment.modules.sys.entity.User">
+  		INSERT INTO SYS_USER_ROLE(
+  			USER_ID,
+  			ROLE_ID
+  		)VALUES(
+  			#{id},
+  			1
+  		) 
+  	</insert>
+  	
+  	<select id="getUserCountByDepts" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID		
+		<!-- 联上检查权限 -->
+		LEFT JOIN T_ROLE_USER UR
+		ON U.ID = UR."USER"
+		LEFT JOIN T_ROLE_RIGHTS RM
+		ON UR.ROLE = RM.ROLE
+		LEFT JOIN T_RIGHTS M
+		ON RM.RIGHTS = M.ID 
+		<!--  -->
+		WHERE U.STATUS = 1  
+		<!-- 验证检查权限 -->
+		AND M.ID = 30164167
+		<!--  -->
+		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%') 
+		<if test="depts != null">
+		AND D.ID IN  
+			<foreach collection="depts" item="dept" open="(" close=")" separator=",">
+	                #{dept}
+	       	 </foreach>
+	    </if>
+  	</select>
+  	
+  	<select id="getUserListByDeptsAndRandom" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+  		SELECT *
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN
+	    FROM 
+		(
+  		SELECT
+  			U.ID "id",
+  			U.NAME "name" 
+		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID		
+		<!-- 联上检查权限 -->
+		LEFT JOIN T_ROLE_USER UR
+		ON U.ID = UR."USER"
+		LEFT JOIN T_ROLE_RIGHTS RM
+		ON UR.ROLE = RM.ROLE
+		LEFT JOIN T_RIGHTS M
+		ON RM.RIGHTS = M.ID 
+		<!--  -->
+		WHERE U.STATUS = 1 
+		<!-- 验证检查权限 -->
+		AND M.ID = 30164167
+		<!--  -->
+		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%')    
+		<if test="depts != null and depts.length != 0">     
+		AND D.ID IN  
+			<foreach collection="depts" item="dept" open="(" close=")" separator=",">  
+	                #{dept}
+	       	 </foreach>
+	    </if>
+	   ORDER BY DBMS_RANDOM.RANDOM()
+	    ) INNER ) WHERE RN &lt;= #{num}
+  	</select>
+  	
+	<select id="getUserListByRandom" resultType="cn.com.comit.appointment.modules.sys.entity.User"> 
+  		SELECT *
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN  
+	    FROM 
+		( 
+  		SELECT
+  			U.ID "id",
+  			U.NAME "name" 
+		FROM T_USER U 
+		LEFT JOIN T_ORGANIZATION A 
+		ON U.ORGANIZATION = A.ID	
+		<!-- 联上检查权限 -->
+		LEFT JOIN T_ROLE_USER UR
+		ON U.ID = UR."USER"
+		LEFT JOIN T_ROLE_RIGHTS RM
+		ON UR.ROLE = RM.ROLE
+		LEFT JOIN T_RIGHTS M
+		ON RM.RIGHTS = M.ID 
+		<!--  -->
+		WHERE U.STATUS = 1
+		<!-- 验证检查权限 -->
+		AND M.ID = 30164167
+		<!--  -->
+		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%') 
+	    ORDER BY DBMS_RANDOM.RANDOM()
+	    ) INNER ) WHERE RN &lt;= #{num}
+  	</select>
+  	
+  	<select id="getUserListByArea" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+  		SELECT 
+  			U.ID,
+  			U.NAME		
+  		FROM T_USER U
+		LEFT JOIN T_ORGANIZATION A
+		ON U.ORGANIZATION = A.ID
+		WHERE U.STATUS = 1
+		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%') 
+  		AND A.ID = #{id}
+  	</select>
+  	
+  	<select id="getUserListByDept" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+  		SELECT 
+  			U.ID,
+  			U.NAME
+  		FROM T_USER U
+  		LEFT JOIN T_ORGANIZATION A
+  		ON U.ORGANIZATION = A.ID
+		LEFT JOIN T_DEPT_USER DU
+		ON DU."USER" = U.ID
+		LEFT JOIN T_DEPT D
+		ON DU.DEPT = D.ID
+  		WHERE U.STATUS = 1
+  		AND (A.ID = #{currentUser.areaId} OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%')
+  		AND D.ID = #{id}
+  	</select>
+  	
+  	<select id="getUserByIdForLogin" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+  		SELECT
+  			U.ID AS "id",
+  			U.ALIAS AS "num",
+  			'123456' AS "pwd", 
+  			U.POSITION AS "sort", 
+  			U.ALIAS AS "alias", 
+  			U.NAME AS "name", 
+  			U.ORGANIZATION AS "areaId",
+    		U.POST AS "post", 
+    		U.CERTIFICATE_NO AS "certificateNo", 
+    		U.CERTIFICATE_CLASS AS "certificateClass", 
+    		U.CERTIFICATE_DATE AS "certificateDate", 
+    		U.VALID_DATE AS "validDate", 
+    		U.STATUS AS "status"
+		FROM T_USER U
+		WHERE U.ID = #{id}
+		AND U.STATUS = #{STATUS_FLAG_NORMAL}
+  	</select>
+  	
+  	<select id="getUserByLoginNameForLogin" resultType="cn.com.comit.appointment.modules.sys.entity.User">
+		SELECT 
+  			U.ID AS "id", 
+  			U.ALIAS AS "num",
+  			'123456' AS "pwd", 
+  			U.POSITION AS "sort", 
+  			U.ALIAS AS "alias", 
+  			U.NAME AS "name", 
+  			U.ORGANIZATION AS "areaId",
+    		U.POST AS "post", 
+    		U.CERTIFICATE_NO AS "certificateNo", 
+    		U.CERTIFICATE_CLASS AS "certificateClass", 
+    		U.CERTIFICATE_DATE AS "certificateDate", 
+    		U.VALID_DATE AS "validDate", 
+    		U.STATUS AS "status"
+		FROM T_USER U
+		WHERE U.ALIAS = #{num}
+		AND U.STATUS = #{STATUS_FLAG_NORMAL}
+	</select>
+	
+</mapper>

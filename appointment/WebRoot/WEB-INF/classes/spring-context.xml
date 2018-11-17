@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jdbc="http://www.springframework.org/schema/jdbc"  
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task"
+     xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.1.xsd
+        "
+	default-lazy-init="true"> 
+	
+	
+	<!-- rabbitmq消息队列 -->
+	<!-- <import resource="classpath*:rabbitMQ.xml" />  -->
+	
+    <context:component-scan base-package="cn.com.comit.appointment"> 
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    
+     
+<!--      定时任务 start   -->
+    <task:annotation-driven />
+ 	<task:scheduler id="scheduler" pool-size="5" /> 
+	 <task:scheduled-tasks>
+	 	<!-- 1 小时: 0 0 8-18 * * ?【8-18点】 整点扫一次 -->
+		<task:scheduled ref="TimedTaskServiceImpl" method="sendMessageToInform"
+						cron="0 0 8-18 * * ?" />
+		<!-- 1 小时: 0 0/30 * * * ? 30分钟扫一次 -->
+		<task:scheduled ref="TimedTaskServiceImpl" method="updateAppointmentStatus"
+						cron="0 0/30  * * * ?" />
+	</task:scheduled-tasks>
+ 	<!-- 定时任务 end -->
+ 
+    
+   
+ 
+  
+ 
+    
+    
+    
+    
+    
+    
+    
+    
+</beans>  

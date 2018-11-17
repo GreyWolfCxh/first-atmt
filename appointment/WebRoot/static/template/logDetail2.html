@@ -1,0 +1,8 @@
+<meta charset="UTF-8">
+<table class="form_table">
+	<tr><td colspan="6" class="part_title_td">详细内容</td></tr>
+	<tr><td class="right_td" style="text-align:center">字段</td><td colspan="2" class="center_td">原内容</td><td colspan="3" class="center_td">新内容</td></tr>
+    {{each fieldList value i}}
+        <tr><td class="right_td">{{value.key}}</td><td colspan="2">{{value.value1}}</td><td colspan="3">{{value.value2}}</td></tr>
+    {{/each}}
+</table>

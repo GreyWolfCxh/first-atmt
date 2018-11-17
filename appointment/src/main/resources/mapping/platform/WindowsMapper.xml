@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.platform.dao.WindowsMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.platform.entity.Windows" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="WINDOW_NAME" property="windowName" jdbcType="VARCHAR" />
+    <result column="WINDOW_AREA" property="windowArea" jdbcType="VARCHAR" />
+    <result column="WINDOW_ADDRESS" property="windowAddress" jdbcType="VARCHAR" />
+    <result column="OPERATOR_ID" property="operatorId" jdbcType="INTEGER" />
+    <result column="OPERATOR_NAME" property="operatorName" jdbcType="VARCHAR" />
+    <result column="DEPT_ID" property="deptId" jdbcType="INTEGER" />
+    <result column="TIME" property="time" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+    <result column="STATUS" property="status" jdbcType="INTEGER" />
+    <result column="APPOINTMENT_DAYS" property="appointmentDays" jdbcType="INTEGER" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, WINDOW_NAME, WINDOW_AREA, WINDOW_ADDRESS, OPERATOR_ID, OPERATOR_NAME, DEPT_ID, 
+    TIME, UPDATE_TIME, STATUS, APPOINTMENT_DAYS, REMARKS1, REMARKS2, REMARKS3, REMARKS4
+  </sql>
+  
+  
+  <!-- 窗口关联部门  -->
+   <resultMap id="DtoWMap" type="cn.com.comit.appointment.modules.platform.paramVo.WinToDeptVo" >
+    <id column="ID" property="dwId" jdbcType="INTEGER" />
+   </resultMap>
+  <!-- 新增窗口关联部门 -->
+  <insert id="insertWindowAndDept" parameterType="java.util.Map" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select T_ATMT_DEPT_TO_WINDOWS_ID_SEQ.nextval as id from dual  
+	</selectKey>
+    insert into TE.T_ATMT_DEPT_TO_WINDOWS (
+       ID, DEPT_ID, WINDOW_ID
+      )
+    values ( 
+    	#{id,jdbcType=INTEGER},#{deptId,jdbcType=INTEGER}, #{windowId,jdbcType=INTEGER}
+      )
+  </insert>
+  <!--显示执法部门对应处理窗口  -->
+    <select id="findDeptAndWindow" resultType="cn.com.comit.appointment.modules.platform.paramVo.WinToDeptVo" parameterType="cn.com.comit.appointment.modules.platform.paramVo.WinToDeptVo" >
+   	SELECT *
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN
+		from(
+		select DW."ID" AS id ,D."ID" AS deptId , D."NAME" AS deptName, W."ID" AS windowId,W."NAME" AS windowName
+			 from T_DEPT D,T_ATMT_DEPT_TO_WINDOWS DW,T_DEPT W
+			where d."ID"=DW.DEPT_ID and DW.WINDOW_ID=w."ID"
+			order by D."ID"
+		)INNER ) WHERE RN BETWEEN #{start} AND #{end}
+		order by deptId
+		
+  </select>
+  <!--执法部门对应处理窗口总数  -->
+  <select id="findDeptAndWindowCount" resultType="java.lang.Integer" parameterType="cn.com.comit.appointment.modules.platform.paramVo.WinToDeptVo" >
+  	select count(1) from T_ATMT_DEPT_TO_WINDOWS
+  </select>
+  <!-- 根据id查找窗口管理部门表 -->
+   <select id="findDeptAndWindowById" resultType="java.lang.Integer" parameterType="java.util.Map" >
+    select DW.ID
+    from TE.T_ATMT_DEPT_TO_WINDOWS DW
+    where DEPT_ID = #{deptId,jdbcType=INTEGER} AND WINDOW_ID=#{windowId,jdbcType=INTEGER}
+  </select>
+  <!-- 根据窗口id获取可预约天数 -->
+  <select id="findDaysByWindowId" resultType="java.lang.Integer" parameterType="java.lang.Integer" >
+    select APPOINTMENT_DAYS
+    from TE.T_ATMT_WINDOWS 
+    where  DEPT_ID=#{windowId,jdbcType=INTEGER}
+  </select>
+  <!-- 查找所有处理窗口 -->
+  <select id="findAllWindow" resultType="cn.com.comit.appointment.modules.platform.paramVo.DeptVo" >
+  		SELECT W.ID, W."WINDOW_NAME" AS text
+  		FROM T_ATMT_WINDOWS W 
+  	</select>
+  	<!--根据违章类型查找窗口信息  -->
+  <select id="findWindowsByIllegalId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_WINDOWS w
+    WHERE w."ID" IN 
+	(select IW.WINDOW_ID from T_ATMT_ILLEGALS_TO_WINDOWS iw
+	where IW.ILLEGAL_ID=#{id,jdbcType=INTEGER})
+  </select>
+  <!-- 根据部门id获取窗口信息 -->
+   <select id="findWindowsByDeptId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_WINDOWS w
+    where  DEPT_ID=#{deptId,jdbcType=INTEGER}
+  </select>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_WINDOWS
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_WINDOWS
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.platform.entity.Windows" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_WINDOWS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_WINDOWS (ID, WINDOW_NAME, WINDOW_AREA, 
+      WINDOW_ADDRESS, OPERATOR_ID, OPERATOR_NAME, 
+      DEPT_ID, TIME, UPDATE_TIME, 
+      STATUS, APPOINTMENT_DAYS, REMARKS1, 
+      REMARKS2, REMARKS3, REMARKS4
+      )
+    values (#{id,jdbcType=INTEGER}, #{windowName,jdbcType=VARCHAR}, #{windowArea,jdbcType=VARCHAR}, 
+      #{windowAddress,jdbcType=VARCHAR}, #{operatorId,jdbcType=INTEGER}, #{operatorName,jdbcType=VARCHAR}, 
+      #{deptId,jdbcType=INTEGER}, #{time,jdbcType=DATE}, #{updateTime,jdbcType=DATE}, 
+      #{status,jdbcType=INTEGER}, #{appointmentDays,jdbcType=INTEGER}, #{remarks1,jdbcType=VARCHAR}, 
+      #{remarks2,jdbcType=VARCHAR}, #{remarks3,jdbcType=VARCHAR}, #{remarks4,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.platform.entity.Windows" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_WINDOWS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_WINDOWS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="windowName != null" >
+        WINDOW_NAME,
+      </if>
+      <if test="windowArea != null" >
+        WINDOW_AREA,
+      </if>
+      <if test="windowAddress != null" >
+        WINDOW_ADDRESS,
+      </if>
+      <if test="operatorId != null" >
+        OPERATOR_ID,
+      </if>
+      <if test="operatorName != null" >
+        OPERATOR_NAME,
+      </if>
+      <if test="deptId != null" >
+        DEPT_ID,
+      </if>
+      <if test="time != null" >
+        TIME,
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME,
+      </if>
+      <if test="status != null" >
+        STATUS,
+      </if>
+      <if test="appointmentDays != null" >
+        APPOINTMENT_DAYS,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="windowName != null" >
+        #{windowName,jdbcType=VARCHAR},
+      </if>
+      <if test="windowArea != null" >
+        #{windowArea,jdbcType=VARCHAR},
+      </if>
+      <if test="windowAddress != null" >
+        #{windowAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorId != null" >
+        #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="appointmentDays != null" >
+        #{appointmentDays,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.platform.entity.Windows" >
+    update TE.T_ATMT_WINDOWS
+    <set >
+      <if test="windowName != null" >
+        WINDOW_NAME = #{windowName,jdbcType=VARCHAR},
+      </if>
+      <if test="windowArea != null" >
+        WINDOW_AREA = #{windowArea,jdbcType=VARCHAR},
+      </if>
+      <if test="windowAddress != null" >
+        WINDOW_ADDRESS = #{windowAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorId != null" >
+        OPERATOR_ID = #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        OPERATOR_NAME = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        DEPT_ID = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="time != null" >
+        TIME = #{time,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="appointmentDays != null" >
+        APPOINTMENT_DAYS = #{appointmentDays,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4 = #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.platform.entity.Windows" >
+    update TE.T_ATMT_WINDOWS
+    set WINDOW_NAME = #{windowName,jdbcType=VARCHAR},
+      WINDOW_AREA = #{windowArea,jdbcType=VARCHAR},
+      WINDOW_ADDRESS = #{windowAddress,jdbcType=VARCHAR},
+      OPERATOR_ID = #{operatorId,jdbcType=INTEGER},
+      OPERATOR_NAME = #{operatorName,jdbcType=VARCHAR},
+      DEPT_ID = #{deptId,jdbcType=INTEGER},
+      TIME = #{time,jdbcType=DATE},
+      UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      STATUS = #{status,jdbcType=INTEGER},
+      APPOINTMENT_DAYS = #{appointmentDays,jdbcType=INTEGER},
+      REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      REMARKS4 = #{remarks4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

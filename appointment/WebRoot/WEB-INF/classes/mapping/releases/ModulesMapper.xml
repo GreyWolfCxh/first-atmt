@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.releases.dao.ModulesMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.releases.entity.Modules" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="DEPT_ID" property="deptId" jdbcType="INTEGER" />
+    <result column="PERIOD" property="period" jdbcType="INTEGER" />
+    <result column="START_TIME" property="startTime" jdbcType="VARCHAR" />
+    <result column="END_TIME" property="endTime" jdbcType="VARCHAR" />
+    <result column="TIME_ITERVAL" property="timeIterval" jdbcType="VARCHAR" />
+    <result column="APPOINTMENT_NUMBER" property="appointmentNumber" jdbcType="INTEGER" />
+    <result column="VERSION" property="version" jdbcType="INTEGER" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, DEPT_ID, PERIOD, START_TIME, END_TIME, TIME_ITERVAL, APPOINTMENT_NUMBER, VERSION, 
+    REMARKS1, REMARKS2, REMARKS3, REMARKS4
+  </sql>
+  
+  <!--获取部门放号模板  -->
+  <select id="findModules" resultMap="BaseResultMap"  >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_MODULES
+    where DEPT_ID = #{deptId} and PERIOD=#{period} and VERSION=#{version}
+  </select>
+  
+  <!--获取部门放号模板  -->
+   <select id="findModulesByDeptId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_MODULES
+    where DEPT_ID = #{deptId,jdbcType=INTEGER}
+  </select>
+  
+  <!-- 获取部门的最大版本号 -->
+  <select id="findMaxVersionByDeptId" resultType="java.lang.Integer" parameterType="java.lang.Integer" >
+   select "MAX"("VERSION") FROM T_ATMT_MODULES
+    where DEPT_ID = #{deptId,jdbcType=INTEGER}
+  </select>
+  
+   <!-- 获取部门的版本列表 -->
+  <select id="findVersionsByDeptId" resultType="java.lang.Integer" parameterType="java.lang.Integer" >
+    select DISTINCT version FROM T_ATMT_MODULES
+    where DEPT_ID = #{deptId,jdbcType=INTEGER}
+     order by "VERSION"
+  </select>
+  
+  <!-- 根据部门编号和版本号删除模板 -->
+   <delete id="delModuleByDeptIdAndVersion" >
+    delete from TE.T_ATMT_MODULES
+   where DEPT_ID = #{deptId} and VERSION=#{version}
+  </delete>
+  
+  <!--根据版本获取放号模板  -->
+   <select id="findModulesByVersion" resultMap="BaseResultMap"  >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_MODULES
+     where DEPT_ID = #{deptId} and VERSION=#{version}
+     order by TIME_ITERVAL
+  </select>
+  
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_MODULES
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_MODULES
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.releases.entity.Modules" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_MODULES_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_MODULES (ID, DEPT_ID, PERIOD, 
+      START_TIME, END_TIME, TIME_ITERVAL, 
+      APPOINTMENT_NUMBER, VERSION, REMARKS1, 
+      REMARKS2, REMARKS3, REMARKS4
+      )
+    values (#{id,jdbcType=INTEGER}, #{deptId,jdbcType=INTEGER}, #{period,jdbcType=INTEGER}, 
+      #{startTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, #{timeIterval,jdbcType=VARCHAR}, 
+      #{appointmentNumber,jdbcType=INTEGER}, #{version,jdbcType=INTEGER}, #{remarks1,jdbcType=VARCHAR}, 
+      #{remarks2,jdbcType=VARCHAR}, #{remarks3,jdbcType=VARCHAR}, #{remarks4,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.releases.entity.Modules" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_MODULES_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_MODULES
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="deptId != null" >
+        DEPT_ID,
+      </if>
+      <if test="period != null" >
+        PERIOD,
+      </if>
+      <if test="startTime != null" >
+        START_TIME,
+      </if>
+      <if test="endTime != null" >
+        END_TIME,
+      </if>
+      <if test="timeIterval != null" >
+        TIME_ITERVAL,
+      </if>
+      <if test="appointmentNumber != null" >
+        APPOINTMENT_NUMBER,
+      </if>
+      <if test="version != null" >
+        VERSION,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="period != null" >
+        #{period,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="timeIterval != null" >
+        #{timeIterval,jdbcType=VARCHAR},
+      </if>
+      <if test="appointmentNumber != null" >
+        #{appointmentNumber,jdbcType=INTEGER},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.releases.entity.Modules" >
+    update TE.T_ATMT_MODULES
+    <set >
+      <if test="deptId != null" >
+        DEPT_ID = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="period != null" >
+        PERIOD = #{period,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        START_TIME = #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        END_TIME = #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="timeIterval != null" >
+        TIME_ITERVAL = #{timeIterval,jdbcType=VARCHAR},
+      </if>
+      <if test="appointmentNumber != null" >
+        APPOINTMENT_NUMBER = #{appointmentNumber,jdbcType=INTEGER},
+      </if>
+      <if test="version != null" >
+        VERSION = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4 = #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.releases.entity.Modules" >
+    update TE.T_ATMT_MODULES
+    set DEPT_ID = #{deptId,jdbcType=INTEGER},
+      PERIOD = #{period,jdbcType=INTEGER},
+      START_TIME = #{startTime,jdbcType=VARCHAR},
+      END_TIME = #{endTime,jdbcType=VARCHAR},
+      TIME_ITERVAL = #{timeIterval,jdbcType=VARCHAR},
+      APPOINTMENT_NUMBER = #{appointmentNumber,jdbcType=INTEGER},
+      VERSION = #{version,jdbcType=INTEGER},
+      REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      REMARKS4 = #{remarks4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

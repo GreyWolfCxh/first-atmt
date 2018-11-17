@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.platform.dao.DeptMapper">
+	<resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.platform.entity.Dept">
+	    <id column="ID" jdbcType="INTEGER" property="id" />
+	    <result column="D.NAME" jdbcType="VARCHAR" property="name" />
+	    <result column="ALIAS" jdbcType="VARCHAR" property="code" />
+	    <result column="CONTACT" jdbcType="VARCHAR" property="linkman" />
+	    <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+	    <result column="TELEPHONE" jdbcType="VARCHAR" property="linkphone" />
+	    <result column="ORGANIZATION" jdbcType="VARCHAR" property="areaId" />
+	    <result column="POSITION" jdbcType="INTEGER" property="sort" />
+	    <result column="STATUS" jdbcType="INTEGER" property="status" />
+	    <result column="A.NAME" jdbcType="VARCHAR" property="areaName"/> 
+  	</resultMap>
+  	<sql id="Base_Column_List">
+	    D.ID, D.NAME AS "D.NAME", D.ALIAS, D.CONTACT, D.ADDRESS, D.TELEPHONE, D.ORGANIZATION, D.POSITION, D.STATUS,
+	    A.NAME AS "A.NAME" 
+  	</sql>
+  	
+  	<!-- 根据部门id获取部门信息 -->
+  	<select id="findDeptById" resultType="cn.com.comit.appointment.modules.platform.entity.Windows" parameterType="java.lang.Integer">
+  		select "ID" AS deptId , "NAME" as windowName ,ADDRESS AS windowAddress,"ORGANIZATION" AS windowArea
+		from T_DEPT 
+		where id=#{windowId}
+  	</select>
+  	
+  	
+  	<!-- 根据地区id获取部门 -->
+  	<select id="findDeptByAreaId" resultType="cn.com.comit.appointment.modules.platform.paramVo.DeptVo" parameterType="java.lang.Integer">
+  		SELECT D.ID, D."NAME" AS text
+  		FROM T_DEPT D 
+		  WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+		  AND
+		  "ORGANIZATION" IN
+		(select "ID" from T_ORGANIZATION TN
+		where TN."PARENT"=#{areaId} OR TN."ID"=#{areaId}
+		)
+  	</select>
+  	
+  	<!--根据用户id获取部门id  -->
+  	<select id="findDeptIdByUserId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+  		SELECT dept from T_DEPT_USER
+		where "USER"=#{userId}
+  	</select>
+  	
+  	<!--根据违章id获取窗口部门信息  -->
+  	<select id="getWindowByIllegalId" resultType="cn.com.comit.appointment.modules.platform.entity.Dept" parameterType="java.lang.Integer">
+  		select D.* from T_DEPT D
+		where D.ID IN 
+		(
+		SELECT tw.WINDOW_ID FROM T_ATMT_ILLEGALS_TO_WINDOWS tw
+		WHERE tw.illegal_id=#{id})
+  	</select>
+  	
+  	<select id="getDeptList" resultMap="BaseResultMap">
+  		SELECT *
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN
+  		FROM 
+		(
+  		SELECT 
+  			<include refid="Base_Column_List"></include>
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+		AND ( A.ID = #{currentUser.areaId} 
+		  OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%' ) 
+  		<if test="code != null and code != ''">
+  			AND D.ALIAS LIKE '%'||#{code}||'%'    
+  		</if>
+  		<if test="name != null and name != ''">
+  			AND D.NAME LIKE '%'||#{name}||'%'
+  		</if>
+  		<if test="areaId != null">
+  			AND (A.ID = #{areaId} OR A.ANCESTOR LIKE '%'||#{areaId}||'%') 
+  		</if>
+  		<if test="address != null and address != ''">
+  			AND D.ADDRESS LIKE '%'||#{address}||'%'
+  		</if> 
+  		<if test="linkman != null and linkman != ''">
+  			AND D.CONTACT LIKE '%'||#{linkman}||'%'
+  		</if>
+  		ORDER BY POSITION  
+	    ) INNER ) WHERE RN BETWEEN #{start} AND #{end}
+  	</select>
+  	
+  	<select id="getDeptTotalCount" resultType="java.lang.Integer">
+  		SELECT 
+  			count(*)
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+		AND ( A.ID = #{currentUser.areaId} 
+		  OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%' ) 
+  		<if test="code != null and code != ''">
+  			AND D.ALIAS LIKE '%'||#{code}||'%'    
+  		</if>
+  		<if test="name != null and name != ''">
+  			AND D.NAME LIKE '%'||#{name}||'%'
+  		</if>
+  		<if test="areaId != null">
+  			AND (A.ID = #{areaId} OR A.ANCESTOR LIKE '%'||#{areaId}||'%') 
+  		</if>
+  		<if test="address != null and address != ''">
+  			AND D.ADDRESS LIKE '%'||#{address}||'%'
+  		</if> 
+  		<if test="linkman != null and linkman != ''">
+  			AND D.CONTACT LIKE '%'||#{linkman}||'%'
+  		</if>
+  	</select>
+  	
+  	
+  	<update id="delDept">
+		UPDATE SYS_DEPT
+			SET STATUS = #{STATUS_FLAG_DELETE}
+		WHERE ID = #{id}
+  	</update>
+  	
+  	<select id="getDeptById" resultMap="BaseResultMap">
+  		SELECT 
+  			<include refid="Base_Column_List"></include>
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+  		AND D.ID = #{id}
+  	</select>
+  	
+  	<update id="updateDept">
+  		 update SYS_DEPT
+	    set NAME = #{name,jdbcType=VARCHAR},
+	      CODE = #{code,jdbcType=VARCHAR},
+	      LINKMAN = #{linkman,jdbcType=VARCHAR},
+	      LEADER = #{leader,jdbcType=VARCHAR},
+	      ADDRESS = #{address,jdbcType=VARCHAR},
+	      LINKPHONE = #{linkphone,jdbcType=VARCHAR},
+	      AREA_ID = #{areaId,jdbcType=VARCHAR},
+	      SORT = #{sort,jdbcType=DECIMAL},
+	      STATUS = #{status,jdbcType=DECIMAL},
+	      BACKUP1 = #{backup1,jdbcType=VARCHAR},
+	      BACKUP2 = #{backup2,jdbcType=VARCHAR},
+	      BACKUP3 = #{backup3,jdbcType=VARCHAR},
+	      BACKUP4 = #{backup4,jdbcType=VARCHAR}
+	    where ID = #{id,jdbcType=DECIMAL}
+  	</update>
+  	
+  	<select id="getDeptByAreaId" resultMap="BaseResultMap">
+  		SELECT 
+  			<include refid="Base_Column_List"></include>
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+  		AND D.ORGANIZATION = #{areaId}
+  	</select>
+  	
+  	<select id="getDeptByNameAndAreaId" resultMap="BaseResultMap">
+  		SELECT 
+  			<include refid="Base_Column_List"></include>
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID 
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+  		AND D.ORGANIZATION = #{areaId}
+  		AND D.NAME = #{name}
+  	</select>
+  	
+  	<update id="delDeptByArea">
+		UPDATE SYS_DEPT
+			SET STATUS = #{STATUS_FLAG_DELETE}
+		WHERE AREA_ID = #{id}
+  	</update>
+  	
+  	<select id="getDeptByAreaIds" resultMap="BaseResultMap">
+  		SELECT 
+  			<include refid="Base_Column_List"></include>
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID   
+  		WHERE D.STATUS != 0
+  		AND A.STATUS != 0
+		AND ( A.ID = #{currentUser.areaId} 
+		  OR A.ANCESTOR LIKE '%'||#{currentUser.areaId}||'%' ) 
+  		<if test="areaIds != null">
+  			AND D.ORGANIZATION IN 
+  				<foreach collection="areaIds" item="areaId" index="index" open="(" close=")" separator=",">
+    				#{areaId}
+    			</foreach>	
+  		</if>
+  	</select>
+  	
+  	<select id="getAllDeptList" resultMap="BaseResultMap">
+  		SELECT 
+  			<include refid="Base_Column_List"></include>,
+			ROWNUM RN
+  		FROM T_DEPT D 
+  		LEFT JOIN T_ORGANIZATION A
+  		ON D.ORGANIZATION = A.ID
+  		WHERE D.STATUS != #{STATUS_FLAG_DELETE}
+  	</select>
+</mapper>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.releases.dao.ReleasesMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.releases.entity.Releases" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="MODULE_ID" property="moduleId" jdbcType="INTEGER" />
+    <result column="WINDOW_ID" property="windowId" jdbcType="INTEGER" />
+    <result column="APPOINTMENT_NUMBER" property="appointmentNumber" jdbcType="INTEGER" />
+    <result column="OPERATION_NUMBER" property="operationNumber" jdbcType="INTEGER" />
+    <result column="DAY" property="day" jdbcType="DATE" />
+    <result column="PERIOD" property="period" jdbcType="INTEGER" />
+    <result column="TIME_ ITERVAL" property="timeIterval" jdbcType="VARCHAR" />
+    <result column="STATUS" property="status" jdbcType="INTEGER" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, MODULE_ID, WINDOW_ID, APPOINTMENT_NUMBER, OPERATION_NUMBER, DAY, PERIOD, "TIME_ ITERVAL", 
+    STATUS, REMARKS1, REMARKS2, REMARKS3, REMARKS4
+  </sql>
+  
+  <!--获取放号情况  -->
+  <select id="getReleasesByDate" resultMap="BaseResultMap"  >
+    SELECT DISTINCT  Day
+    FROM T_ATMT_RELEASES t WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{date}||'%')
+   and WINDOW_ID=#{windowId}
+	ORDER BY "DAY"
+  </select>
+  <!--统计当天的放号总数  -->
+  <select id="getReleasesCountByDate" resultType="cn.com.comit.appointment.modules.releases.paramVo.ReleasesVo"  >
+    SELECT  sum(t.APPOINTMENT_NUMBER) as appointmentNumber,sum(t.OPERATION_NUMBER) as operationNumber 
+    FROM T_ATMT_RELEASES t WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{date}||'%')
+    and WINDOW_ID=#{windowId}
+  </select>
+  <!--获取当天放号情况  -->
+  <select id="getReleasesByDateAndPeriod" resultMap="BaseResultMap">
+    SELECT 
+    <include refid="Base_Column_List" />
+    FROM T_ATMT_RELEASES t WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{date}||'%')
+    and PERIOD=#{period}  and WINDOW_ID=#{windowId}
+  </select>
+  <!-- 获取预约时间段的剩余放号数量 -->
+   <select id="findAppointNumberByDate" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List" />
+    FROM T_ATMT_RELEASES t WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{appointmentDay}||'%')
+    and t."TIME_ ITERVAL"=#{timeItersal}   and t.WINDOW_ID=#{windowId}
+  </select>
+  <!--获取预约时间段  -->
+   <select id="findAppointTimeByDate" resultType="java.lang.String">
+    SELECT t."TIME_ ITERVAL"
+    FROM T_ATMT_RELEASES t WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{appointmentDay}||'%')
+      and t.WINDOW_ID=#{windowId}
+  </select>
+  <!-- 根据窗口id和日期删除放号记录 -->
+   <delete id="deleteRecordByWinIdAndDate"  >
+    delete from TE.T_ATMT_RELEASES t
+   WHERE(to_char(t.day,'yyyy-MM-dd hh24:mi:ss') LIKE '%'||#{date}||'%')
+     and WINDOW_ID=#{windowId}
+  </delete>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_RELEASES
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_RELEASES
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.releases.entity.Releases" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_RELEASES_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_RELEASES (ID, MODULE_ID, WINDOW_ID, 
+      APPOINTMENT_NUMBER, OPERATION_NUMBER, DAY, 
+      PERIOD, "TIME_ ITERVAL", STATUS, 
+      REMARKS1, REMARKS2, REMARKS3, 
+      REMARKS4)
+    values (#{id,jdbcType=INTEGER}, #{moduleId,jdbcType=INTEGER}, #{windowId,jdbcType=INTEGER}, 
+      #{appointmentNumber,jdbcType=INTEGER}, #{operationNumber,jdbcType=INTEGER}, #{day,jdbcType=DATE}, 
+      #{period,jdbcType=INTEGER}, #{timeIterval,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+      #{remarks1,jdbcType=VARCHAR}, #{remarks2,jdbcType=VARCHAR}, #{remarks3,jdbcType=VARCHAR}, 
+      #{remarks4,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.releases.entity.Releases" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_RELEASES_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_RELEASES
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="moduleId != null" >
+        MODULE_ID,
+      </if>
+      <if test="windowId != null" >
+        WINDOW_ID,
+      </if>
+      <if test="appointmentNumber != null" >
+        APPOINTMENT_NUMBER,
+      </if>
+      <if test="operationNumber != null" >
+        OPERATION_NUMBER,
+      </if>
+      <if test="day != null" >
+        DAY,
+      </if>
+      <if test="period != null" >
+        PERIOD,
+      </if>
+      <if test="timeIterval != null" >
+        "TIME_ ITERVAL",
+      </if>
+      <if test="status != null" >
+        STATUS,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="moduleId != null" >
+        #{moduleId,jdbcType=INTEGER},
+      </if>
+      <if test="windowId != null" >
+        #{windowId,jdbcType=INTEGER},
+      </if>
+      <if test="appointmentNumber != null" >
+        #{appointmentNumber,jdbcType=INTEGER},
+      </if>
+      <if test="operationNumber != null" >
+        #{operationNumber,jdbcType=INTEGER},
+      </if>
+      <if test="day != null" >
+        #{day,jdbcType=DATE},
+      </if>
+      <if test="period != null" >
+        #{period,jdbcType=INTEGER},
+      </if>
+      <if test="timeIterval != null" >
+        #{timeIterval,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.releases.entity.Releases" >
+    update TE.T_ATMT_RELEASES
+    <set >
+      <if test="moduleId != null" >
+        MODULE_ID = #{moduleId,jdbcType=INTEGER},
+      </if>
+      <if test="windowId != null" >
+        WINDOW_ID = #{windowId,jdbcType=INTEGER},
+      </if>
+      <if test="appointmentNumber != null" >
+        APPOINTMENT_NUMBER = #{appointmentNumber,jdbcType=INTEGER},
+      </if>
+      <if test="operationNumber != null" >
+        OPERATION_NUMBER = #{operationNumber,jdbcType=INTEGER},
+      </if>
+      <if test="day != null" >
+        DAY = #{day,jdbcType=DATE},
+      </if>
+      <if test="period != null" >
+        PERIOD = #{period,jdbcType=INTEGER},
+      </if>
+      <if test="timeIterval != null" >
+        "TIME_ ITERVAL" = #{timeIterval,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4 = #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.releases.entity.Releases" >
+    update TE.T_ATMT_RELEASES
+    set MODULE_ID = #{moduleId,jdbcType=INTEGER},
+      WINDOW_ID = #{windowId,jdbcType=INTEGER},
+      APPOINTMENT_NUMBER = #{appointmentNumber,jdbcType=INTEGER},
+      OPERATION_NUMBER = #{operationNumber,jdbcType=INTEGER},
+      DAY = #{day,jdbcType=DATE},
+      PERIOD = #{period,jdbcType=INTEGER},
+      "TIME_ ITERVAL" = #{timeIterval,jdbcType=VARCHAR},
+      STATUS = #{status,jdbcType=INTEGER},
+      REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      REMARKS4 = #{remarks4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

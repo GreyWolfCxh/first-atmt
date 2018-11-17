@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.platform.dao.AddFieldsMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.platform.entity.AddFields" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="ILLEGAL_ID" property="illegalId" jdbcType="INTEGER" />
+    <result column="ADD_ZNAME" property="addZname" jdbcType="VARCHAR" />
+    <result column="ADD_ENAME" property="addEname" jdbcType="VARCHAR" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, ILLEGAL_ID, ADD_ZNAME, ADD_ENAME, REMARKS1, REMARKS2, REMARKS3, REMARKS4
+  </sql>
+  
+  <!--根据违章id获取补充字段  -->
+   <select id="findAddFieldsByIllegalId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_ADD_FIELDS
+    where ILLEGAL_ID = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_ADD_FIELDS
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_ADD_FIELDS
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.platform.entity.AddFields" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_ADDFIELDS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_ADD_FIELDS (ID, ILLEGAL_ID, ADD_ZNAME, 
+      ADD_ENAME, REMARKS1, REMARKS2, 
+      REMARKS3, REMARKS4)
+    values (#{id,jdbcType=INTEGER}, #{illegalId,jdbcType=INTEGER}, #{addZname,jdbcType=VARCHAR}, 
+      #{addEname,jdbcType=VARCHAR}, #{remarks1,jdbcType=VARCHAR}, #{remarks2,jdbcType=VARCHAR}, 
+      #{remarks3,jdbcType=VARCHAR}, #{remarks4,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.platform.entity.AddFields" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_ADDFIELDS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_ADD_FIELDS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="illegalId != null" >
+        ILLEGAL_ID,
+      </if>
+      <if test="addZname != null" >
+        ADD_ZNAME,
+      </if>
+      <if test="addEname != null" >
+        ADD_ENAME,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="illegalId != null" >
+        #{illegalId,jdbcType=INTEGER},
+      </if>
+      <if test="addZname != null" >
+        #{addZname,jdbcType=VARCHAR},
+      </if>
+      <if test="addEname != null" >
+        #{addEname,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.platform.entity.AddFields" >
+    update TE.T_ATMT_ADD_FIELDS
+    <set >
+      <if test="illegalId != null" >
+        ILLEGAL_ID = #{illegalId,jdbcType=INTEGER},
+      </if>
+      <if test="addZname != null" >
+        ADD_ZNAME = #{addZname,jdbcType=VARCHAR},
+      </if>
+      <if test="addEname != null" >
+        ADD_ENAME = #{addEname,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4 = #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.platform.entity.AddFields" >
+    update TE.T_ATMT_ADD_FIELDS
+    set ILLEGAL_ID = #{illegalId,jdbcType=INTEGER},
+      ADD_ZNAME = #{addZname,jdbcType=VARCHAR},
+      ADD_ENAME = #{addEname,jdbcType=VARCHAR},
+      REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      REMARKS4 = #{remarks4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

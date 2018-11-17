@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.sys.dao.LogsMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.sys.entity.Logs" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="OPERATE_TYPE" property="operateType" jdbcType="VARCHAR" />
+    <result column="CONTENT" property="content" jdbcType="VARCHAR" />
+    <result column="OPERATER" property="operater" jdbcType="INTEGER" />
+    <result column="OPERATE_TIME" property="operateTime" jdbcType="DATE" />
+    <result column="BACKUP1" property="backup1" jdbcType="VARCHAR" />
+    <result column="BACKUP2" property="backup2" jdbcType="VARCHAR" />
+    <result column="BACKUP3" property="backup3" jdbcType="VARCHAR" />
+    <result column="BACKUP4" property="backup4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, OPERATE_TYPE, CONTENT, OPERATER, OPERATE_TIME, BACKUP1, BACKUP2, BACKUP3, BACKUP4
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_LOGS
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_LOGS
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.sys.entity.Logs" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_LOGS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_LOGS (ID, OPERATE_TYPE, CONTENT, 
+      OPERATER, OPERATE_TIME, BACKUP1, 
+      BACKUP2, BACKUP3, BACKUP4
+      )
+    values (#{id,jdbcType=INTEGER}, #{operateType,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{operater,jdbcType=INTEGER}, #{operateTime,jdbcType=DATE}, #{backup1,jdbcType=VARCHAR}, 
+      #{backup2,jdbcType=VARCHAR}, #{backup3,jdbcType=VARCHAR}, #{backup4,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.sys.entity.Logs" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_LOGS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_LOGS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="operateType != null" >
+        OPERATE_TYPE,
+      </if>
+      <if test="content != null" >
+        CONTENT,
+      </if>
+      <if test="operater != null" >
+        OPERATER,
+      </if>
+      <if test="operateTime != null" >
+        OPERATE_TIME,
+      </if>
+      <if test="backup1 != null" >
+        BACKUP1,
+      </if>
+      <if test="backup2 != null" >
+        BACKUP2,
+      </if>
+      <if test="backup3 != null" >
+        BACKUP3,
+      </if>
+      <if test="backup4 != null" >
+        BACKUP4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="operateType != null" >
+        #{operateType,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="operater != null" >
+        #{operater,jdbcType=INTEGER},
+      </if>
+      <if test="operateTime != null" >
+        #{operateTime,jdbcType=DATE},
+      </if>
+      <if test="backup1 != null" >
+        #{backup1,jdbcType=VARCHAR},
+      </if>
+      <if test="backup2 != null" >
+        #{backup2,jdbcType=VARCHAR},
+      </if>
+      <if test="backup3 != null" >
+        #{backup3,jdbcType=VARCHAR},
+      </if>
+      <if test="backup4 != null" >
+        #{backup4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.sys.entity.Logs" >
+    update TE.T_ATMT_LOGS
+    <set >
+      <if test="operateType != null" >
+        OPERATE_TYPE = #{operateType,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        CONTENT = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="operater != null" >
+        OPERATER = #{operater,jdbcType=INTEGER},
+      </if>
+      <if test="operateTime != null" >
+        OPERATE_TIME = #{operateTime,jdbcType=DATE},
+      </if>
+      <if test="backup1 != null" >
+        BACKUP1 = #{backup1,jdbcType=VARCHAR},
+      </if>
+      <if test="backup2 != null" >
+        BACKUP2 = #{backup2,jdbcType=VARCHAR},
+      </if>
+      <if test="backup3 != null" >
+        BACKUP3 = #{backup3,jdbcType=VARCHAR},
+      </if>
+      <if test="backup4 != null" >
+        BACKUP4 = #{backup4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.sys.entity.Logs" >
+    update TE.T_ATMT_LOGS
+    set OPERATE_TYPE = #{operateType,jdbcType=VARCHAR},
+      CONTENT = #{content,jdbcType=VARCHAR},
+      OPERATER = #{operater,jdbcType=INTEGER},
+      OPERATE_TIME = #{operateTime,jdbcType=DATE},
+      BACKUP1 = #{backup1,jdbcType=VARCHAR},
+      BACKUP2 = #{backup2,jdbcType=VARCHAR},
+      BACKUP3 = #{backup3,jdbcType=VARCHAR},
+      BACKUP4 = #{backup4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

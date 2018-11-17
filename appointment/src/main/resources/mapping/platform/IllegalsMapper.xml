@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.comit.appointment.modules.platform.dao.IllegalsMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.comit.appointment.modules.platform.entity.Illegals" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="ILLEGAL_NAME" property="illegalName" jdbcType="VARCHAR" />
+    <result column="ILLEGAL_TYPE" property="illegalType" jdbcType="VARCHAR" />
+    <result column="ILLEGAL_STATUS" property="illegalStatus" jdbcType="INTEGER" />
+    <result column="SORT" property="sort" jdbcType="VARCHAR" />
+    <result column="SERACH_STATUS" property="searchStatus" jdbcType="INTEGER" />
+    <result column="WINDOW_STATUS" property="windowStatus" jdbcType="INTEGER" />
+    <result column="ADDATA_STATUS" property="adDataStatus" jdbcType="INTEGER" />
+    <result column="TIPS" property="tips" jdbcType="VARCHAR" />
+    <result column="TIME" property="time" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+    <result column="REMARKS1" property="remarks1" jdbcType="VARCHAR" />
+    <result column="REMARKS2" property="remarks2" jdbcType="VARCHAR" />
+    <result column="REMARKS3" property="remarks3" jdbcType="VARCHAR" />
+    <result column="REMARKS4" property="remarks4" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, ILLEGAL_NAME, ILLEGAL_TYPE, ILLEGAL_STATUS, SORT, SERACH_STATUS, WINDOW_STATUS, ADDATA_STATUS, TIPS, TIME, 
+    UPDATE_TIME, REMARKS1, REMARKS2, REMARKS3, REMARKS4
+  </sql>
+  
+  
+  <!--获取所有违章类型记录  -->
+   <select id="findAllIllegals" resultMap="BaseResultMap"  >
+	    SELECT 
+	    	 <include refid="Base_Column_List" />
+	    FROM TE.T_ATMT_ILLEGALS
+	    order by ID
+	    
+  </select>
+  <!-- 获取违章类型信息列表 -->
+  <select id="findIllegals" resultMap="BaseResultMap"  >
+    
+    SELECT  <include refid="Base_Column_List" />
+  		FROM
+	    (SELECT INNER.*,ROWNUM RN
+	    FROM 
+		(
+	    SELECT 
+	    	 <include refid="Base_Column_List" />
+	    FROM TE.T_ATMT_ILLEGALS
+	   
+	    ) INNER ) WHERE RN BETWEEN #{start} AND #{end}
+	    order by ID
+	    
+  </select>
+  <!--获取违章类型信息总数  -->
+  <select id="findIllegalsCount" resultType="java.lang.Integer" >
+    select count(1)
+    from TE.T_ATMT_ILLEGALS
+  </select>
+  
+  <!--根据名字获取违章类型  -->
+   <select id="findIllegalsTypeByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_ILLEGALS
+    where ILLEGAL_NAME = #{illegalName}
+  </select>
+  
+  
+   <!-- 新增窗口关联违章类型 -->
+  <insert id="addIllegalAndWindow" parameterType="java.util.Map" >
+   <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_ILLEGALS_TO_WINDOWS_SEQ.nextval as id from dual  
+	</selectKey>
+    insert into TE.T_ATMT_ILLEGALS_TO_WINDOWS (
+       ID, ILLEGAL_ID, WINDOW_ID
+      )
+    values ( 
+    	#{id,jdbcType=INTEGER},#{illegalTypeId,jdbcType=INTEGER}, #{windowId,jdbcType=INTEGER}
+      )
+  </insert>
+  
+  
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from TE.T_ATMT_ILLEGALS
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from TE.T_ATMT_ILLEGALS
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.com.comit.appointment.modules.platform.entity.Illegals" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_ILLEGALS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_ILLEGALS (ID, ILLEGAL_NAME, ILLEGAL_TYPE, 
+      ILLEGAL_STATUS, SORT, SERACH_STATUS, WINDOW_STATUS, ADDATA_STATUS,
+      TIPS, TIME, UPDATE_TIME, REMARKS1, 
+      REMARKS2, REMARKS3, REMARKS4
+      )
+    values (#{id,jdbcType=INTEGER}, #{illegalName,jdbcType=VARCHAR}, #{illegalType,jdbcType=VARCHAR}, 
+      #{illegalStatus,jdbcType=INTEGER}, #{sort,jdbcType=VARCHAR}, #{searchStatus,jdbcType=INTEGER}, #{windowStatus,jdbcType=INTEGER},  #{adDataStatus,jdbcType=INTEGER}, 
+      #{tips,jdbcType=VARCHAR}, #{time,jdbcType=DATE}, #{updateTime,jdbcType=DATE}, #{remarks1,jdbcType=VARCHAR}, 
+      #{remarks2,jdbcType=VARCHAR}, #{remarks3,jdbcType=VARCHAR}, #{remarks4,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.comit.appointment.modules.platform.entity.Illegals" >
+  <selectKey keyProperty="id" resultType="INTEGER" order="BEFORE">  
+	            select ATMT_ILLEGALS_ID_SEQ.nextval from dual  
+	</selectKey>
+    insert into TE.T_ATMT_ILLEGALS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="illegalName != null" >
+        ILLEGAL_NAME,
+      </if>
+      <if test="illegalType != null" >
+        ILLEGAL_TYPE,
+      </if>
+      <if test="illegalStatus != null" >
+        ILLEGAL_STATUS,
+      </if>
+      <if test="sort != null" >
+        SORT,
+      </if>
+      <if test="searchStatus != null" >
+        SERACH_STATUS,
+      </if>
+       <if test="windowStatus != null" >
+        WINDOW_STATUS,
+      </if>
+       <if test="adDataStatus != null" >
+        ADDATA_STATUS,
+      </if>
+      <if test="tips != null" >
+        TIPS,
+      </if>
+      <if test="time != null" >
+        TIME,
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME,
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1,
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2,
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3,
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="illegalName != null" >
+        #{illegalName,jdbcType=VARCHAR},
+      </if>
+      <if test="illegalType != null" >
+        #{illegalType,jdbcType=VARCHAR},
+      </if>
+      <if test="illegalStatus != null" >
+        #{illegalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=VARCHAR},
+      </if>
+      <if test="searchStatus != null" >
+        #{searchStatus,jdbcType=INTEGER},
+      </if>
+      <if test="windowStatus != null" >
+        #{windowStatus,jdbcType=INTEGER},
+      </if>
+      <if test="adDataStatus != null" >
+        #{adDataStatus,jdbcType=INTEGER},
+      </if>
+      <if test="tips != null" >
+        #{tips,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="remarks1 != null" >
+        #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.comit.appointment.modules.platform.entity.Illegals" >
+    update TE.T_ATMT_ILLEGALS
+    <set >
+      <if test="illegalName != null" >
+        ILLEGAL_NAME = #{illegalName,jdbcType=VARCHAR},
+      </if>
+      <if test="illegalType != null" >
+        ILLEGAL_TYPE = #{illegalType,jdbcType=VARCHAR},
+      </if>
+      <if test="illegalStatus != null" >
+        ILLEGAL_STATUS = #{illegalStatus,jdbcType=INTEGER},
+      </if>
+      <if test="sort != null" >
+        SORT = #{sort,jdbcType=VARCHAR},
+      </if>
+      <if test="searchStatus != null" >
+        SERACH_STATUS = #{searchStatus,jdbcType=INTEGER},
+      </if>
+      <if test="windowStatus != null" >
+        WINDOW_STATUS = #{windowStatus,jdbcType=INTEGER},
+      </if>
+      <if test="adDataStatus != null" >
+        ADDATA_STATUS = #{adDataStatus,jdbcType=INTEGER},
+      </if>
+      <if test="tips != null" >
+        TIPS = #{tips,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        TIME = #{time,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="remarks1 != null" >
+        REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks2 != null" >
+        REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks3 != null" >
+        REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks4 != null" >
+        REMARKS4 = #{remarks4,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.comit.appointment.modules.platform.entity.Illegals" >
+    update TE.T_ATMT_ILLEGALS
+    set ILLEGAL_NAME = #{illegalName,jdbcType=VARCHAR},
+      ILLEGAL_TYPE = #{illegalType,jdbcType=VARCHAR},
+      ILLEGAL_STATUS = #{illegalStatus,jdbcType=INTEGER},
+      SORT = #{sort,jdbcType=VARCHAR},
+      SERACH_STATUS = #{searchStatus,jdbcType=INTEGER},
+      WINDOW_STATUS = #{windowStatus,jdbcType=INTEGER},
+      ADDATA_STATUS = #{adDataStatus,jdbcType=INTEGER},
+      TIPS = #{tips,jdbcType=VARCHAR},
+      TIME = #{time,jdbcType=DATE},
+      UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      REMARKS1 = #{remarks1,jdbcType=VARCHAR},
+      REMARKS2 = #{remarks2,jdbcType=VARCHAR},
+      REMARKS3 = #{remarks3,jdbcType=VARCHAR},
+      REMARKS4 = #{remarks4,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
